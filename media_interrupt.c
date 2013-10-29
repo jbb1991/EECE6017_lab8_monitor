@@ -30,6 +30,11 @@ void HEX_PS2(char, char);
  * 	5. The speed of refreshing the VGA screen
  * 	   are controlled by interrupts from the interval timer
 ********************************************************************************/
+#define RIGHT 1
+#define LEFT 2
+#define UP 4
+#define DOWN 8
+
 int main(void)
 {
 	/* Declare volatile pointers to I/O registers (volatile means that IO load
@@ -39,6 +44,8 @@ int main(void)
 	volatile int * KEY_ptr = (int *) 0x10000050;					// pushbutton KEY address
 	volatile int * audio_ptr = (int *) 0x10003040;				// audio port address
 	volatile int * PS2_ptr = (int *) 0x10000100;					// PS/2 port address
+    const int box_len = 8;
+    unsigned int flags = 0;
 
 	/* initialize some variables */
 	byte1 = 0; byte2 = 0; 			// used to hold PS/2 data
@@ -51,6 +58,7 @@ int main(void)
 	int blue_x1; int blue_y1; int blue_x2; int blue_y2; 
 	int screen_x; int screen_y; int char_buffer_x; int char_buffer_y;
 	short color;
+    const short background_color = 0x1863;
 
 	/* set the interval timer period for scrolling the HEX displays */
 	int counter = 0x960000;				// 1/(50 MHz) x (0x960000) ~= 200 msec
@@ -83,45 +91,53 @@ int main(void)
 	color = 0x1863;		// a dark grey color
 	VGA_box (0, 0, screen_x, screen_y, color);	// fill the screen with grey
 	// draw a medium-blue box around the above text, based on the character buffer coordinates
-	blue_x1 = 28; blue_x2 = 36; blue_y1 = 26; blue_y2 = 34;
+	blue_x = 28; blue_y = 26; 
 	// character coords * 4 since characters are 4 x 4 pixel buffer coords (8 x 8 VGA coords)
 	color = 0x187F;		// a medium blue color
-	VGA_box (blue_x1 * 4, blue_y1 * 4, blue_x2 * 4, blue_y2 * 4, color);
+	VGA_box (blue_x * 4, blue_y * 4, 8, color);
 	/* output text message in the middle of the VGA monitor */
 //	VGA_text (blue_x1 + 5, blue_y1 + 3, text_top_VGA);
 //	VGA_text (blue_x1 + 5, blue_y1 + 4, text_bottom_VGA);
 
 	char_buffer_x = 79; char_buffer_y = 59;
-	ALT_x1 = 0; ALT_x2 = 5/* ALTERA = 6 chars */; ALT_y = 0; ALT_inc_x = 1; ALT_inc_y = 1;
+	ALT_x1 = 0; ALT_x2 = 5/* ALTERA = 6 chars */; ALT_y = 0; ALT_inc_x = 0; ALT_inc_y = -1;
 	VGA_text (ALT_x1, ALT_y, text_ALTERA);
+    flags |= UP;
 	while (1)
 	{
 		while (!timeout)
 			;	// wait to synchronize with timer 
 
 		/* move the ALTERA text around on the VGA screen */
-		VGA_text (ALT_x1, ALT_y, text_erase);		// erase
+		VGA_text (ALT_x1, ALT_y,8, text_erase);		// erase
 		ALT_x1 += ALT_inc_x; 
 		ALT_x2 += ALT_inc_x; 
 		ALT_y += ALT_inc_y;
 
-		if ( (ALT_y == char_buffer_y) || (ALT_y == 0) )
-			ALT_inc_y = -(ALT_inc_y);
-		if ( (ALT_x2 == char_buffer_x) || (ALT_x1 == 0) )
-			ALT_inc_x = -(ALT_inc_x);
+        VGA_box(blue_x, blue_y, box_len, background_color);
+        blue_x += ALT_inc_x;
+        blue_y += ALT_inc_y;
 
-		if ( (ALT_y >= blue_y1 - 1) && (ALT_y <= blue_y2 + 1) )
-		{
-			if ( ((ALT_x1 >= blue_x1 - 1) && (ALT_x1 <= blue_x2 + 1)) ||
-				((ALT_x2 >= blue_x1 - 1) && (ALT_x2 <= blue_x2 + 1)) )
-			{
-				if ( (ALT_y == (blue_y1 - 1)) || (ALT_y == (blue_y2 + 1)) )
-					ALT_inc_y = -(ALT_inc_y);
-				else
-					ALT_inc_x = -(ALT_inc_x);
-			}
-		}
-		VGA_text (ALT_x1, ALT_y, text_ALTERA);
+		if (blue_y <= 0)
+			ALT_inc_y = -(ALT_inc_y);
+            flags = DOWN;
+		if (blue_x == 0)
+			ALT_inc_x = -(ALT_inc_x);
+            flags = RIGHT;
+        if ((blue_y+box_len >= screen_y) || (blue_x+box_len >= screen_x)) {
+			if(flags & DOWN) {
+                ALT_inc_y = 0;
+                ALT_inc_x = -1;
+                flags = LEFT;
+            }
+            else {
+                ALT_inc_y = -1;
+                ALT_inc_x = 0;
+                flags = UP;
+            }
+        }
+
+		VGA_box (blue_x, blue_y, box_len,color);
 
 		/* display PS/2 data (from interrupt service routine) on HEX displays */
 		HEX_PS2 (byte1, byte2);
@@ -151,16 +167,16 @@ void VGA_text(int x, int y, char * text_ptr)
 /****************************************************************************************
  * Draw a filled rectangle on the VGA monitor 
 ****************************************************************************************/
-void VGA_box(int x1, int y1, int x2, int y2, short pixel_color)
+void VGA_box(int x, int y, int len, short pixel_color)
 {
 	int offset, row, col;
   	volatile short * pixel_buffer = (short *) 0x08000000;	// VGA pixel buffer
 
 	/* assume that the box coordinates are valid */
-	for (row = y1; row <= y2; row++)
+	for (row = y; row <= y+len; row++)
 	{
-		col = x1;
-		while (col <= x2)
+		col = x;
+		while (col <= x+len)
 		{
 			offset = (row << 9) + col;
 			*(pixel_buffer + offset) = pixel_color;	// compute halfword address, set pixel
