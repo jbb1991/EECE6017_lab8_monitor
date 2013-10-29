@@ -101,9 +101,9 @@ int main(void)
 //	VGA_text (blue_x1 + 5, blue_y1 + 4, text_bottom_VGA);
 
 	char_buffer_x = 79; char_buffer_y = 59;
-	ALT_x1 = 0; ALT_x2 = 5/* ALTERA = 6 chars */; ALT_y = 0; ALT_inc_x = 0; ALT_inc_y = -1;
+	ALT_x1 = 0; ALT_x2 = 5/* ALTERA = 6 chars */; ALT_y = 0; ALT_inc_x = 0; ALT_inc_y = -4;
 	VGA_text (ALT_x1, ALT_y, text_ALTERA);
-    flags |= UP;
+    flags = UP;
 	while (1)
 	{
 		while (!timeout)
@@ -113,20 +113,22 @@ int main(void)
         blue_x += ALT_inc_x;
         blue_y += ALT_inc_y;
 
-		if (blue_y <= 0)
+		if (blue_y <= 0) {
 			ALT_inc_y = -(ALT_inc_y);
             flags = DOWN;
-		if (blue_x == 0)
+        }
+		if (blue_x == 0) {
 			ALT_inc_x = -(ALT_inc_x);
             flags = RIGHT;
+        }
         if ((blue_y+box_len >= screen_y) || (blue_x+box_len >= screen_x)) {
 			if(flags & DOWN) {
                 ALT_inc_y = 0;
-                ALT_inc_x = -1;
+                ALT_inc_x = -4;
                 flags = LEFT;
             }
             else {
-                ALT_inc_y = -1;
+                ALT_inc_y = -4;
                 ALT_inc_x = 0;
                 flags = UP;
             }
