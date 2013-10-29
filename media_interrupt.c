@@ -117,25 +117,27 @@ int main(void)
 			ALT_inc_y = -(ALT_inc_y);
             flags = DOWN;
         }
-        else if (blue_x == 0) {
+        else if (blue_x <= 0) {
 			ALT_inc_x = -(ALT_inc_x);
             flags = RIGHT;
         }
-        else if ((blue_y+box_len >= screen_y) || (blue_x+box_len >= screen_x)) {
+        else if (blue_y+box_len >= screen_y) {
 			if(blue_y+box_len > screen_y)
 			{
 				blue_y = screen_y-box_len-1;
-			}
-			if(blue_x > screen_x)
-			{
-				blue_x = screen_x-box_len-1;
 			}
             if(flags & DOWN) {
                 ALT_inc_y = 0;
                 ALT_inc_x = -4;
                 flags = LEFT;
             }
-            else {
+        }
+        else if(blue_x+box_len >= screen_x) {
+			if(blue_x > screen_x)
+			{
+				blue_x = screen_x-box_len-1;
+			}
+            if(flags & RIGHT) {
                 ALT_inc_y = -4;
                 ALT_inc_x = 0;
                 flags = UP;
