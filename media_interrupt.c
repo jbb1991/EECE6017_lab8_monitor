@@ -9,6 +9,7 @@ extern volatile int timeout;							// used to synchronize with the timer
 /* function prototypes */
 void VGA_text (int, int, char *);
 void VGA_box (int, int, int, short);
+void fill_screen (int, int, int, int, short);
 void HEX_PS2(char, char);
 
 /********************************************************************************
@@ -89,7 +90,7 @@ int main(void)
 	/* the following variables give the size of the pixel buffer */
 	screen_x = 319; screen_y = 239;
 	color = 0x1863;		// a dark grey color
-	VGA_box (0, 0, screen_x, screen_y, color);	// fill the screen with grey
+	fill_screen (0, 0, screen_x, screen_y, color);	// fill the screen with grey
 	// draw a medium-blue box around the above text, based on the character buffer coordinates
 	blue_x = 28; blue_y = 26; 
 	// character coords * 4 since characters are 4 x 4 pixel buffer coords (8 x 8 VGA coords)
@@ -171,6 +172,27 @@ void VGA_box(int x, int y, int len, short pixel_color)
 	{
 		col = x;
 		while (col <= x+len)
+		{
+			offset = (row << 9) + col;
+			*(pixel_buffer + offset) = pixel_color;	// compute halfword address, set pixel
+			++col;
+		}
+	}
+}
+
+/****************************************************************************************
+ * Draw a filled rectangle on the VGA monitor 
+****************************************************************************************/
+void fill_screen(int x1, int y1, int x2, int y2, short pixel_color)
+{
+	int offset, row, col;
+  	volatile short * pixel_buffer = (short *) 0x08000000;	// VGA pixel buffer
+
+	/* assume that the box coordinates are valid */
+	for (row = y; row <= y2; row++)
+	{
+		col = x1;
+		while (col <= x2)
 		{
 			offset = (row << 9) + col;
 			*(pixel_buffer + offset) = pixel_color;	// compute halfword address, set pixel
