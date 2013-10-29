@@ -83,13 +83,13 @@ int main(void)
 	color = 0x1863;		// a dark grey color
 	VGA_box (0, 0, screen_x, screen_y, color);	// fill the screen with grey
 	// draw a medium-blue box around the above text, based on the character buffer coordinates
-	blue_x1 = 28; blue_x2 = 52; blue_y1 = 26; blue_y2 = 34;
+	blue_x1 = 28; blue_x2 = 36; blue_y1 = 26; blue_y2 = 34;
 	// character coords * 4 since characters are 4 x 4 pixel buffer coords (8 x 8 VGA coords)
 	color = 0x187F;		// a medium blue color
 	VGA_box (blue_x1 * 4, blue_y1 * 4, blue_x2 * 4, blue_y2 * 4, color);
 	/* output text message in the middle of the VGA monitor */
-	VGA_text (blue_x1 + 5, blue_y1 + 3, text_top_VGA);
-	VGA_text (blue_x1 + 5, blue_y1 + 4, text_bottom_VGA);
+//	VGA_text (blue_x1 + 5, blue_y1 + 3, text_top_VGA);
+//	VGA_text (blue_x1 + 5, blue_y1 + 4, text_bottom_VGA);
 
 	char_buffer_x = 79; char_buffer_y = 59;
 	ALT_x1 = 0; ALT_x2 = 5/* ALTERA = 6 chars */; ALT_y = 0; ALT_inc_x = 1; ALT_inc_y = 1;
