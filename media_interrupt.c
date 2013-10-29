@@ -8,7 +8,7 @@ extern volatile int timeout;							// used to synchronize with the timer
 
 /* function prototypes */
 void VGA_text (int, int, char *);
-void VGA_box (int, int, int, int, short);
+void VGA_box (int, int, int, short);
 void HEX_PS2(char, char);
 
 /********************************************************************************
@@ -55,7 +55,7 @@ int main(void)
 	/* these variables are used for a blue box and a "bouncing" ALTERA on the VGA screen */
 	int ALT_x1; int ALT_x2; int ALT_y; 
 	int ALT_inc_x; int ALT_inc_y;
-	int blue_x1; int blue_y1; int blue_x2; int blue_y2; 
+	int blue_x; int blue_y; 
 	int screen_x; int screen_y; int char_buffer_x; int char_buffer_y;
 	short color;
     const short background_color = 0x1863;
@@ -107,12 +107,6 @@ int main(void)
 	{
 		while (!timeout)
 			;	// wait to synchronize with timer 
-
-		/* move the ALTERA text around on the VGA screen */
-		VGA_text (ALT_x1, ALT_y,8, text_erase);		// erase
-		ALT_x1 += ALT_inc_x; 
-		ALT_x2 += ALT_inc_x; 
-		ALT_y += ALT_inc_y;
 
         VGA_box(blue_x, blue_y, box_len, background_color);
         blue_x += ALT_inc_x;
