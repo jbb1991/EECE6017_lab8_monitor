@@ -189,7 +189,7 @@ void fill_screen(int x1, int y1, int x2, int y2, short pixel_color)
   	volatile short * pixel_buffer = (short *) 0x08000000;	// VGA pixel buffer
 
 	/* assume that the box coordinates are valid */
-	for (row = y; row <= y2; row++)
+	for (row = y1; row <= y2; row++)
 	{
 		col = x1;
 		while (col <= x2)
