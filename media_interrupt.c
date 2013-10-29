@@ -95,7 +95,7 @@ int main(void)
 	blue_x = 28; blue_y = 26; 
 	// character coords * 4 since characters are 4 x 4 pixel buffer coords (8 x 8 VGA coords)
 	color = 0x187F;		// a medium blue color
-	VGA_box (blue_x * 4, blue_y * 4, 8, color);
+	//VGA_box (blue_x * 4, blue_y * 4, 8, color);
 	/* output text message in the middle of the VGA monitor */
 //	VGA_text (blue_x1 + 5, blue_y1 + 3, text_top_VGA);
 //	VGA_text (blue_x1 + 5, blue_y1 + 4, text_bottom_VGA);
@@ -122,6 +122,14 @@ int main(void)
             flags = RIGHT;
         }
         if ((blue_y+box_len >= screen_y) || (blue_x+box_len >= screen_x)) {
+			if(blue_y+box_len > screen_y)
+			{
+				blue_y = screen_y-box_len-1;
+			}
+			if(blue_x > screen_x)
+			{
+				blue_x = screen_x-box_len-1;
+			}
 			if(flags & DOWN) {
                 ALT_inc_y = 0;
                 ALT_inc_x = -4;
