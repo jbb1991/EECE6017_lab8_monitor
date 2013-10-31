@@ -1,12 +1,16 @@
 #include "nios2_ctrl_reg_macros.h"
+#include "globals.h"
 
 /* these globals are written by interrupt service routines; we have to declare 
  * these as volatile to avoid the compiler caching their values in registers */
 extern volatile char byte1, byte2, byte3;			/* modified by PS/2 interrupt service routine */
 extern volatile int record, play, buffer_index;	// used for audio
 extern volatile int timeout;							// used to synchronize with the timer
+extern volatile char *kbBuf;  // Use to store the keyboard input
+extern volatile unsigned int kbBufBegin, kbBufEnd; // Used to keep track of the keyboard input
 
 /* function prototypes */
+void VGA_subStrn(int, int, char *, unsigned int, unsigned int, unsigned int);
 void VGA_text (int, int, char *);
 void VGA_box (int, int, int, short);
 void fill_screen (int, int, int, int, short);
@@ -147,11 +151,10 @@ int main(void)
 		VGA_box (blue_x, blue_y, box_len,color);
 
 		/* display PS/2 data (from interrupt service routine) on HEX displays */
-		HEX_PS2 (byte1, byte2);
+		VGA_subStrn(0, 0, kbBuf, kbBufBegin, kbBufEnd, KB_BUF_SIZE);
 		timeout = 0;
 	}
 }
-
 
 /****************************************************************************************
  * Subroutine to send a string of text to the VGA monitor 
@@ -160,7 +163,6 @@ void VGA_text(int x, int y, char * text_ptr)
 {
 	int offset;
   	volatile char * character_buffer = (char *) 0x09000000;	// VGA character buffer
-
 	/* assume that the text string fits on one line */
 	offset = (y << 7) + x;
 	while ( *(text_ptr) )
@@ -168,6 +170,31 @@ void VGA_text(int x, int y, char * text_ptr)
 		*(character_buffer + offset) = *(text_ptr);	// write to the character buffer
 		++text_ptr;
 		++offset;
+	}
+}
+
+/****************************************************************************************
+ * Subroutine to print a substring to the VGA monitor from a circular buffer
+ * x - horizontal location on the screen to start writing the text
+ * y - vertical location on the screen to start writing text
+ * buffer - circular buffer holding the string to write
+ * first - index in the buffer to start writing the string
+ * last - index after the last character to write
+ * len - length of the buffer
+****************************************************************************************/
+void VGA_subStrn(int x, int y, char *buffer, unsigned int first, unsigned int last, unsigned int len)
+{
+	int offset;
+  	volatile char * character_buffer = (char *) 0x09000000;	// VGA character buffer
+    unsigned int idx = first%len;
+    last = last%len;
+	/* assume that the text string fits on one line */
+	offset = (y << 7) + x;
+    while(idx != last)
+	{
+		*(character_buffer + offset) = buffer[idx];	// write to the character buffer
+		++offset;
+        idx = (idx+1)%len;
 	}
 }
 
