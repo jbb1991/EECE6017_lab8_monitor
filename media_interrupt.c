@@ -172,64 +172,99 @@ void VGA_text(int x, int y, char * text_ptr)
 	}
 }
 
-/**
- * lookUpKBCode - lookup table for keyboard key codes, based
- * on table from www.computer-engineering.com/ps2keyboard/scancodes2.html.
- * Currently only supports alpha-numerics
- */
-char lookUpCharKBCode(const char c)
-{
-    switch(c) {
-        case 'a': return 0x1C;
-        case 'b': return 0x32;
-        case 'c': return 0x21;
-        case 'd': return 0x23;
-        case 'e': return 0x24;
-        case 'f': return 0x2B;
-        case 'g': return 0x34;
-        case 'h': return 0x33;
-        case 'i': return 0x43;
-        case 'j': return 0x3B;
-        case 'k': return 0x42;
-        case 'l': return 0x4B;
-        case 'm': return 0x3A;
-        case 'n': return 0x31;
-        case 'o': return 0x44;
-        case 'p': return 0x4D;
-        case 'q': return 0x15;
-        case 'r': return 0x2D;
-        case 's': return 0x1B;
-        case 't': return 0x2C;
-        case 'u': return 0x3C;
-        case 'v': return 0x2A;
-        case 'w': return 0x1D;
-        case 'x': return 0x22;
-        case 'y': return 0x35;
-        case 'z': return 0x1A;
-        case '0': return 0x45;
-        case '1': return 0x16;
-        case '2': return 0x1E;
-        case '3': return 0x26;
-        case '4': return 0x25;
-        case '5': return 0x2E;
-        case '6': return 0x36;
-        case '7': return 0x3D;
-        case '8': return 0x3E;
-        case '9': return 0x46;
-		case '\n': return 0x5A;
-		case ' ': return 0x29;
+char getHexCharacter(const char h) {
+    switch(h) {
+        case 0x00: return '0';
+        case 0x01: return '1';
+        case 0x02: return '2';
+        case 0x03: return '3';
+        case 0x04: return '4';
+        case 0x05: return '5';
+        case 0x06: return '6';
+        case 0x07: return '7';
+        case 0x08: return '8';
+        case 0x09: return '9';
+        case 0x0A: return 'A';
+        case 0x0B: return 'B';
+        case 0x0C: return 'C';
+        case 0x0D: return 'D';
+        case 0x0E: return 'E';
+        case 0x0F: return 'F';
         default: return '&';
     }
+    return '&';
+}
+
+
+/**
+ * lookUpKBCode - reverse lookup table for keyboard key codes, based
+ * on table from www.computer-engineering.com/ps2keyboard/scancodes2.html.
+ * Currently only supports alpha-numerics
+ * buffer - place characters of hex value for the scancode into this buffer
+ */
+void lookUpCharKBCode(char* buffer, const char c)
+{
+    char tmp;
+    switch(c) {
+        case 'a': tmp= 0x1C;
+        case 'b': tmp= 0x32;
+        case 'c': tmp= 0x21;
+        case 'd': tmp= 0x23;
+        case 'e': tmp= 0x24;
+        case 'f': tmp= 0x2B;
+        case 'g': tmp= 0x34;
+        case 'h': tmp= 0x33;
+        case 'i': tmp= 0x43;
+        case 'j': tmp= 0x3B;
+        case 'k': tmp= 0x42;
+        case 'l': tmp= 0x4B;
+        case 'm': tmp= 0x3A;
+        case 'n': tmp= 0x31;
+        case 'o': tmp= 0x44;
+        case 'p': tmp= 0x4D;
+        case 'q': tmp= 0x15;
+        case 'r': tmp= 0x2D;
+        case 's': tmp= 0x1B;
+        case 't': tmp= 0x2C;
+        case 'u': tmp= 0x3C;
+        case 'v': tmp= 0x2A;
+        case 'w': tmp= 0x1D;
+        case 'x': tmp= 0x22;
+        case 'y': tmp= 0x35;
+        case 'z': tmp= 0x1A;
+        case '0': tmp= 0x45;
+        case '1': tmp= 0x16;
+        case '2': tmp= 0x1E;
+        case '3': tmp= 0x26;
+        case '4': tmp= 0x25;
+        case '5': tmp= 0x2E;
+        case '6': tmp= 0x36;
+        case '7': tmp= 0x3D;
+        case '8': tmp= 0x3E;
+        case '9': tmp= 0x46;
+		case '\n': tmp=  0x5A;
+		case ' ': tmp= 0x29;
+        default: *buffer= "&&";
+                 return;
+    }
+    char left = tmp >> 4;
+    tmp &= 0x0F;
+    buffer[1] = getHexCharacter(left);
+    buffer[0] = getHexCharacter(right);
+
 }
 
 void VGA_printKBScanCode(int x, int y, const char c) {
     int offset;
     volatile char out;
   	volatile char * character_buffer = (char *) 0x09000000;	// VGA character buffer
-    out = lookUpCharKBCode(c);
+    char buffer[2];
+    out = lookUpCharKBCode(buffer,c);
 	/* assume that the text string fits on one line */
 	offset = (y << 7) + x;
-    *(character_buffer + offset) = out;
+    *(character_buffer + offset) = buffer[0];
+    offset++;
+    *(character_buffer + offset) = buffer[1];
 }
 
 /****************************************************************************************
