@@ -1,5 +1,5 @@
 #include "globals.h"
-extern volatile char byte1, byte2;
+extern volatile char byte1, byte2, byte3;
 extern volatile char *kbBuf;
 extern volatile unsigned int kbBufBegin, kbBufEnd;
 
@@ -47,6 +47,8 @@ char lookUpKBCode(const char scanCode)
         case 0x3D: return '7';
         case 0x3E: return '8';
         case 0x46: return '9';
+		case 0x5A: return '\n';
+		case 0x29: return ' ';
         default: return '&';
     }
 }
@@ -77,8 +79,14 @@ void PS2_ISR( void )
 			*(PS2_ptr) = 0xF4;
 
         // byte 2 == 0x00 means make key,
+		printf("byte 1 = %x, byte 2 = %x\n",byte1,byte2);
+		if(byte2 == (char)0XF0) {
+			byte3 = byte1;
+		}
+		if(byte1 == byte2 || byte2 == (char)0xF0 || byte2 == (char)0xAA || byte3 == byte2)
+			return;
         // lookup byte 1 in table on next update or now?
-        lookUpResult = lookUpKBCode(byte1);
+        lookUpResult = lookUpKBCode(byte2);
         // If the user pressed enter, clear the buffer
         if(lookUpResult == '\n') {
             kbBufEnd = kbBufBegin;
