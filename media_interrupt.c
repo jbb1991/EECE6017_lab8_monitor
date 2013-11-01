@@ -106,7 +106,6 @@ int main(void)
 
 	char_buffer_x = 79; char_buffer_y = 59;
 	ALT_x1 = 0; ALT_x2 = 5/* ALTERA = 6 chars */; ALT_y = 0; ALT_inc_x = 0; ALT_inc_y = -4;
-	//VGA_text (ALT_x1, ALT_y, text_ALTERA);
     flags = UP;
 	while (1)
 	{
@@ -173,6 +172,66 @@ void VGA_text(int x, int y, char * text_ptr)
 	}
 }
 
+/**
+ * lookUpKBCode - lookup table for keyboard key codes, based
+ * on table from www.computer-engineering.com/ps2keyboard/scancodes2.html.
+ * Currently only supports alpha-numerics
+ */
+char lookUpCharKBCode(const char c)
+{
+    switch(c) {
+        case 'a': return 0x1C;
+        case 'b': return 0x32;
+        case 'c': return 0x21;
+        case 'd': return 0x23;
+        case 'e': return 0x24;
+        case 'f': return 0x2B;
+        case 'g': return 0x34;
+        case 'h': return 0x33;
+        case 'i': return 0x43;
+        case 'j': return 0x3B;
+        case 'k': return 0x42;
+        case 'l': return 0x4B;
+        case 'm': return 0x3A;
+        case 'n': return 0x31;
+        case 'o': return 0x44;
+        case 'p': return 0x4D;
+        case 'q': return 0x15;
+        case 'r': return 0x2D;
+        case 's': return 0x1B;
+        case 't': return 0x2C;
+        case 'u': return 0x3C;
+        case 'v': return 0x2A;
+        case 'w': return 0x1D;
+        case 'x': return 0x22;
+        case 'y': return 0x35;
+        case 'z': return 0x1A;
+        case '0': return 0x45;
+        case '1': return 0x16;
+        case '2': return 0x1E;
+        case '3': return 0x26;
+        case '4': return 0x25;
+        case '5': return 0x2E;
+        case '6': return 0x36;
+        case '7': return 0x3D;
+        case '8': return 0x3E;
+        case '9': return 0x46;
+		case '\n': return 0x5A;
+		case ' ': return 0x29;
+        default: return '&';
+    }
+}
+
+void VGA_printKBScanCode(int x, int y, const char c) {
+    int offset;
+  	volatile char * character_buffer = (char *) 0x09000000;	// VGA character buffer
+    unsigned int idx = first%len;
+    last = last%len;
+	/* assume that the text string fits on one line */
+	offset = (y << 7) + x;
+    *(character_buffer + offset) = c;
+}
+
 /****************************************************************************************
  * Subroutine to print a substring to the VGA monitor from a circular buffer
  * x - horizontal location on the screen to start writing the text
@@ -196,6 +255,7 @@ void VGA_subStrn(int x, int y, char *buffer, unsigned int first, unsigned int la
 		++offset;
         idx = (idx+1)%len;
 	}
+    VGA_printKBScanCode(0, 10, buffer[last]);
 }
 
 /****************************************************************************************
