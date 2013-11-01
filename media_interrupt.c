@@ -225,8 +225,6 @@ char lookUpCharKBCode(const char c)
 void VGA_printKBScanCode(int x, int y, const char c) {
     int offset;
   	volatile char * character_buffer = (char *) 0x09000000;	// VGA character buffer
-    unsigned int idx = first%len;
-    last = last%len;
 	/* assume that the text string fits on one line */
 	offset = (y << 7) + x;
     *(character_buffer + offset) = c;
