@@ -4,13 +4,6 @@ extern volatile char *kbBuf;
 extern volatile unsigned int kbBufBegin, kbBufEnd;
 extern volatile int change;
 
-// PS2MouseStk, PS2KBStk, PS2_STACK_SIZE, PS2*Handler
-#define PS2_STACK_SIZE 1024
-OS_STK PS2MouseStk[PS2_STACK_SIZE];
-OS_STK PS2KBStk[PS2_STACK_SIZE];
-
-void PS2MouseHandler(void *data);
-void PS2KBHandler(void *data);
 /**
  * lookUpKBCode - lookup table for keyboard key codes, based
  * on table from www.computer-engineering.org/ps2keyboard/scancodes2.html.
@@ -79,48 +72,7 @@ void PS2_ISR( void )
 	RVALID = (PS2_data & 0x8000);			// extract the RVALID field
 	if (RVALID)
 	{
-		byte1 = byte2;
-		byte2 = PS2_data & 0xFF;
-		if ( (byte1 == (char) 0xAA) && (byte2 == (char) 0x00) )
-			// mouse inserted; initialize sending of data
-			*(PS2_ptr) = 0xF4;
-			ps2Mode = PS2_MOUSE;
-		else if( (byte1 == (char) 0xAA) && (byte2 == (char) 0x00) ) {
-			// Keyboard inserted;
-			ps2Mode = PS2_KEYBOARD;
-		}
-		if(ps2Mode == PS2_MOUSE) {
-			OSTeskCreateExt(PS2MouseHandler,
-							NULL,
-							PS2MouseStk[PS2_STACK_SIZE-1],
-							PS2_PRIO,
-							PS2_PRIO,
-							PS2MouseStk,
-							PS2_STACK_SIZE,
-							NULL,
-							0
-			);
-		}
-		else if(ps2Mode == PS2_KEYBOARD) {
-			OSTeskCreateExt(PS2KBHandler,
-							NULL,
-							PS2KBStk[PS2_STACK_SIZE-1],
-							PS2_PRIO,
-							PS2_PRIO,
-							PS2KBStk,
-							PS2_STACK_SIZE,
-							NULL,
-							0
-			);
-		}
-	}
-	return;
-}
-
-
-	/*  Old PS2_ISR functionality
-		char err;
-		// always save the last two bytes received
+		/* always save the last two bytes received */
 		byte1 = byte2;
 		byte2 = PS2_data & 0xFF;
 		if ( (byte1 == (char) 0xAA) && (byte2 == (char) 0x00) )
@@ -142,10 +94,10 @@ void PS2_ISR( void )
             return;
         }
 		change = 1;
-		OSSemPend(kbLock, 0, &err);
         kbBuf[kbBufEnd] = lookUpResult;
         kbBufEnd = (kbBufEnd+1)%KB_BUF_SIZE;
         if(kbBufEnd == kbBufBegin)
-            kbBufBegin = (kbBufBegin + 1)%KB_BUF_SIZE;
-		OSSemPost(kbLock);
-	*/
+            ++kbBufBegin;
+	}
+	return;
+}

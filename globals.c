@@ -13,9 +13,3 @@ volatile int change;							//ps/2 bool flag for buffer change
 
 volatile int timeout;								// used to synchronize with the timer
 
-volatile OS_EVENT *kbLock;
-
-// PS2 Mode
-volatile unsigned char ps2Mode;
-#define PS2_MOUSE 1
-#define PS2_KEYBOARD 2

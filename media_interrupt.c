@@ -57,11 +57,6 @@ int main(void)
 	byte1 = 0; byte2 = 0; 			// used to hold PS/2 data
 	record = 0; play = 0; buffer_index = 0;	// used for audio record/playback
 	timeout = 0;										// synchronize with the timer
-	kbLock = OSSemCreate((short)1);
-	if(kbLock == NULL) {
-		printf("Unable to create semaphore!\n");
-		return -1;
-	}
 
 	/* these variables are used for a blue box and a "bouncing" ALTERA on the VGA screen */
 	int ALT_x1; int ALT_x2; int ALT_y; 
@@ -239,7 +234,7 @@ void VGA_subStrn(int x, int y, char *buffer, unsigned int first, unsigned int la
 		++offset;
         idx = (idx+1)%len;
 	}
-    VGA_printKBScanCode(x, y+10, buffer[last]);
+    VGA_printKBScanCode(0, 10);
 }
 
 /****************************************************************************************
