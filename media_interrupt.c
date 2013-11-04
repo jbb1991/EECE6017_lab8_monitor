@@ -201,74 +201,14 @@ char getHexCharacter(const char h) {
 }
 
 
-/**
- * lookUpKBCode - reverse lookup table for keyboard key codes, based
- * on table from www.computer-engineering.com/ps2keyboard/scancodes2.html.
- * Currently only supports alpha-numerics
- * buffer - place characters of hex value for the scancode into this buffer
- */
-void lookUpCharKBCode(char* buffer, const char c)
-{
-    char tmp;
-    switch(c) {
-        case 'a': tmp= 0x1C;
-        case 'b': tmp= 0x32;
-        case 'c': tmp= 0x21;
-        case 'd': tmp= 0x23;
-        case 'e': tmp= 0x24;
-        case 'f': tmp= 0x2B;
-        case 'g': tmp= 0x34;
-        case 'h': tmp= 0x33;
-        case 'i': tmp= 0x43;
-        case 'j': tmp= 0x3B;
-        case 'k': tmp= 0x42;
-        case 'l': tmp= 0x4B;
-        case 'm': tmp= 0x3A;
-        case 'n': tmp= 0x31;
-        case 'o': tmp= 0x44;
-        case 'p': tmp= 0x4D;
-        case 'q': tmp= 0x15;
-        case 'r': tmp= 0x2D;
-        case 's': tmp= 0x1B;
-        case 't': tmp= 0x2C;
-        case 'u': tmp= 0x3C;
-        case 'v': tmp= 0x2A;
-        case 'w': tmp= 0x1D;
-        case 'x': tmp= 0x22;
-        case 'y': tmp= 0x35;
-        case 'z': tmp= 0x1A;
-        case '0': tmp= 0x45;
-        case '1': tmp= 0x16;
-        case '2': tmp= 0x1E;
-        case '3': tmp= 0x26;
-        case '4': tmp= 0x25;
-        case '5': tmp= 0x2E;
-        case '6': tmp= 0x36;
-        case '7': tmp= 0x3D;
-        case '8': tmp= 0x3E;
-        case '9': tmp= 0x46;
-		case '\n': tmp=  0x5A;
-		case ' ': tmp= 0x29;
-        default: *buffer= "&&";
-                 return;
-    }
-    char left = tmp >> 4;
-    tmp &= 0x0F;
-    buffer[1] = getHexCharacter(left);
-    buffer[0] = getHexCharacter(tmp);
-
-}
-
 void VGA_printKBScanCode(int x, int y, const char c) {
     int offset;
   	volatile char * character_buffer = (char *) 0x09000000;	// VGA character buffer
-    char buffer[2];
-    lookUpCharKBCode(buffer,c);
 	/* assume that the text string fits on one line */
 	offset = (y << 7) + x;
-    *(character_buffer + offset) = buffer[0];
+    *(character_buffer + offset) = byte1;
     offset++;
-    *(character_buffer + offset) = buffer[1];
+    *(character_buffer + offset) = byte2;
 }
 
 /****************************************************************************************
