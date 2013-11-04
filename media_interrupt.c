@@ -19,7 +19,7 @@ extern volatile int packetY;
 void VGA_subStrn(int, int, char *, unsigned int, unsigned int, unsigned int);
 void VGA_text (int, int, char *);
 void VGA_box (int, int, int, short);
-void VGA_mouse (int, short);
+void VGA_mouse (void);
 void fill_screen (int, int, int, int, short);
 void HEX_PS2(char, char);
 
@@ -165,7 +165,7 @@ int main(void)
 			VGA_subStrn(0, 0, kbBuf, kbBufBegin, kbBufEnd, KB_BUF_SIZE);
 		}
 		else if(isMouse && mouseDataReady) {
-			VGA_mouse(box_len,color);
+			VGA_mouse();
 		}
 		timeout = 0;
 	}
@@ -269,26 +269,32 @@ void VGA_box(int x, int y, int len, short pixel_color)
 	}
 }
 
-void VGA_mouse (int len, short pixel_color) {
+void VGA_mouse (void) {
 	int offset, row, col;
 	int y = packetY%SCREEN_HEIGHT;
 	int x = packetX%SCREEN_WIDTH;
   	volatile short * pixel_buffer = (short *) 0x08000000;	// VGA pixel buffer
-
+	const int len = 7;
+	short pixelColor;
+	const short allUp = 0x6350AA,
+				leftDown = 0xAA2081,
+				rightDown = 0x6350AA,
+				bothDown = 0x0D712B;
   	//logic to determine how much to move the box
-
-	/* assume that the box coordinates are valid */
-	printf("byte1: %x, byteX: %x, byteY: %x\n", packet1, packetX, packetY);
-	for (row = y; row <= y+len; row++)
-	{
-		col = x;
-		while (col <= x+len)
-		{
-			offset = (row << 9) + col;
-			*(pixel_buffer + offset) = pixel_color;	// compute halfword address, set pixel
-			++col;
-		}
+	if(packet1&1 == 1) {
+		pixelColor = leftDown;
 	}
+	else if(packet1&2 == 2) {
+		pixelColor = rightDown;
+	}
+	else if(packet1&3 == 3) {
+		pixelColor = bothDown;
+	}
+	else {
+		pixelColor = allUp;
+	}
+	/* assume that the box coordinates are valid */
+	VGA_box(x, y, len, pixelColor);
 }
 
 /****************************************************************************************
