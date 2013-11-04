@@ -162,7 +162,7 @@ int main(void)
 			VGA_subStrn(0, 0, kbBuf, kbBufBegin, kbBufEnd, KB_BUF_SIZE);
 		}
 		else if(isMouse) {
-			VGA_mouse(blue_x, blue_y, box_len,color);
+			VGA_mouse(box_len,color);
 		}
 		timeout = 0;
 	}
