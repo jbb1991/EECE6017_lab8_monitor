@@ -15,3 +15,4 @@ volatile int change;							//ps/2 bool flag for buffer change
 volatile int timeout;								// used to synchronize with the timer
 
 volatile int isMouse = 0;
+volatile int mouseDataReady = 0;

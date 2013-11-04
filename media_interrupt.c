@@ -10,6 +10,7 @@ extern volatile char *kbBuf;  // Use to store the keyboard input
 extern volatile unsigned int kbBufBegin, kbBufEnd; // Used to keep track of the keyboard input
 extern volatile int change;//used to check change of input
 extern volatile int isMouse;
+extern volatile int mouseDataReady;
 extern volatile int packet1;
 extern volatile int packetX;
 extern volatile int packetY;
@@ -45,6 +46,8 @@ void HEX_PS2(char, char);
 #define LEFT 2
 #define UP 4
 #define DOWN 8
+#define SCREEN_WIDTH 319
+#define SCREEN_HEIGHT 239
 
 int main(void)
 {
@@ -98,7 +101,7 @@ int main(void)
 
 
 	/* the following variables give the size of the pixel buffer */
-	screen_x = 319; screen_y = 239;
+	screen_x = SCREEN_WIDTH; screen_y = SCREEN_HEIGHT;
 	color = 0x1863;		// a dark grey color
 	fill_screen (0, 0, screen_x, screen_y, color);	// fill the screen with grey
 	// draw a medium-blue box around the above text, based on the character buffer coordinates
@@ -161,7 +164,7 @@ int main(void)
 			change = 0;
 			VGA_subStrn(0, 0, kbBuf, kbBufBegin, kbBufEnd, KB_BUF_SIZE);
 		}
-		else if(isMouse) {
+		else if(isMouse && mouseDataReady) {
 			VGA_mouse(box_len,color);
 		}
 		timeout = 0;
@@ -268,8 +271,8 @@ void VGA_box(int x, int y, int len, short pixel_color)
 
 void VGA_mouse (int len, short pixel_color) {
 	int offset, row, col;
-	int y = 15;
-	int x = 15;
+	int y = packetY%SCREEN_HEIGHT;
+	int x = packetX%SCREEN_WIDTH;
   	volatile short * pixel_buffer = (short *) 0x08000000;	// VGA pixel buffer
 
   	//logic to determine how much to move the box

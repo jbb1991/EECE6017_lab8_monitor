@@ -68,6 +68,7 @@ char lookUpKBCode(const char scanCode)
 ****************************************************************************************/
 void PS2_ISR( void )
 {
+	static char byteCount = 0;
   	volatile int * PS2_ptr = (int *) 0x10000100;		// PS/2 port address
 	int PS2_data, RVALID;
     char lookUpResult;
@@ -88,10 +89,20 @@ void PS2_ISR( void )
         }
 
         if(isMouse && (byte2 != (char)0xFA)) {
-            packet1 = (PS2_data & 0xFF0000) >> 16;
-            packetX = (PS2_data & 0xFF00) >> 8;
-            packetY = PS2_data & 0xFF;
-            return;
+			if(byteCount == 0) {
+				packet1 = PS2_data & 0xFF;
+				mouseDataReady = 0;
+			}
+			else if(byteCount == 1) {
+				packetX = PS2_data & 0xFF;
+				mouseDataReady = 0;
+			}
+			else if(byteCount == 2) {
+				packetY = PS2_data & 0xFF;
+				mouseDataRedy = 1;
+			}
+            byteCount = (byteCount + 1)%3;
+			return;
         }
         // byte 2 == 0x00 means make key,
 		//printf("byte 1 = %x, byte 2 = %x\n",byte1,byte2);
