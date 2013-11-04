@@ -8,6 +8,7 @@ extern volatile int record, play, buffer_index;	// used for audio
 extern volatile int timeout;							// used to synchronize with the timer
 extern volatile char *kbBuf;  // Use to store the keyboard input
 extern volatile unsigned int kbBufBegin, kbBufEnd; // Used to keep track of the keyboard input
+extern volatile int change;//used to check change of input
 
 /* function prototypes */
 void VGA_subStrn(int, int, char *, unsigned int, unsigned int, unsigned int);
@@ -150,7 +151,11 @@ int main(void)
 		VGA_box (blue_x, blue_y, box_len,color);
 
 		/* display PS/2 data (from interrupt service routine) on HEX displays */
-		VGA_subStrn(0, 0, kbBuf, kbBufBegin, kbBufEnd, KB_BUF_SIZE);
+		if(change == 1)
+		{
+			change = 0;
+			VGA_subStrn(0, 0, kbBuf, kbBufBegin, kbBufEnd, KB_BUF_SIZE);
+		}
 		timeout = 0;
 	}
 }
@@ -250,16 +255,15 @@ void lookUpCharKBCode(char* buffer, const char c)
     char left = tmp >> 4;
     tmp &= 0x0F;
     buffer[1] = getHexCharacter(left);
-    buffer[0] = getHexCharacter(right);
+    buffer[0] = getHexCharacter(tmp);
 
 }
 
 void VGA_printKBScanCode(int x, int y, const char c) {
     int offset;
-    volatile char out;
   	volatile char * character_buffer = (char *) 0x09000000;	// VGA character buffer
     char buffer[2];
-    out = lookUpCharKBCode(buffer,c);
+    lookUpCharKBCode(buffer,c);
 	/* assume that the text string fits on one line */
 	offset = (y << 7) + x;
     *(character_buffer + offset) = buffer[0];

@@ -2,6 +2,7 @@
 extern volatile char byte1, byte2, byte3;
 extern volatile char *kbBuf;
 extern volatile unsigned int kbBufBegin, kbBufEnd;
+extern volatile int change;
 
 /**
  * lookUpKBCode - lookup table for keyboard key codes, based
@@ -92,7 +93,7 @@ void PS2_ISR( void )
             kbBufEnd = kbBufBegin;
             return;
         }
-
+		change = 1;
         kbBuf[kbBufEnd] = lookUpResult;
         kbBufEnd = (kbBufEnd+1)%KB_BUF_SIZE;
         if(kbBufEnd == kbBufBegin)
