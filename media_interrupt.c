@@ -206,9 +206,9 @@ void VGA_printKBScanCode(int x, int y, const char c) {
   	volatile char * character_buffer = (char *) 0x09000000;	// VGA character buffer
 	/* assume that the text string fits on one line */
 	offset = (y << 7) + x;
-    *(character_buffer + offset) = byte1;
+    *(character_buffer + offset) = getHexCharacter(c & 0x0F);
     offset++;
-    *(character_buffer + offset) = byte2;
+    *(character_buffer + offset) = getHexCharacter((c >> 4) & 0x0F);
 }
 
 /****************************************************************************************
