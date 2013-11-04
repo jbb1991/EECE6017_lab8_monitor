@@ -84,7 +84,7 @@ void PS2_ISR( void )
 		if(byte2 == (char)0XF0) {
 			byte3 = byte1;
 		}
-		if(byte1 == byte2 || byte2 == (char)0xF0 || byte2 == (char)0xAA || byte3 == byte2)
+		if(byte1 == byte2 || byte2 == (char)0xF0 || byte2 == (char)0xAA || byte3 == byte2 || byte2 == (char)0xFA)
 			return;
         // lookup byte 1 in table on next update or now?
         lookUpResult = lookUpKBCode(byte2);
