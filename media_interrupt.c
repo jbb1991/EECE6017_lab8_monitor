@@ -275,7 +275,7 @@ void VGA_mouse (int len, short pixel_color) {
   	//logic to determine how much to move the box
 
 	/* assume that the box coordinates are valid */
-	printf("byte1: %x, byteX: %x, byteY: %x\n", byte1, byteX, byteY);
+	printf("byte1: %x, byteX: %x, byteY: %x\n", packet1, packetX, packetY);
 	for (row = y; row <= y+len; row++)
 	{
 		col = x;

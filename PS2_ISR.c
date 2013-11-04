@@ -94,7 +94,7 @@ void PS2_ISR( void )
             return;
         }
         // byte 2 == 0x00 means make key,
-		printf("byte 1 = %x, byte 2 = %x\n",byte1,byte2);
+		//printf("byte 1 = %x, byte 2 = %x\n",byte1,byte2);
 		if(byte2 == (char)0XF0) {
 			byte3 = byte1;
 		}
