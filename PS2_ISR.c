@@ -3,6 +3,10 @@ extern volatile char byte1, byte2, byte3;
 extern volatile char *kbBuf;
 extern volatile unsigned int kbBufBegin, kbBufEnd;
 extern volatile int change;
+extern volatile int isMouse;
+extern volatile int packet1;
+extern volatile int packetX;
+extern volatile int packetY;
 
 /**
  * lookUpKBCode - lookup table for keyboard key codes, based

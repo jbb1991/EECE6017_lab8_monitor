@@ -9,12 +9,16 @@ extern volatile int timeout;							// used to synchronize with the timer
 extern volatile char *kbBuf;  // Use to store the keyboard input
 extern volatile unsigned int kbBufBegin, kbBufEnd; // Used to keep track of the keyboard input
 extern volatile int change;//used to check change of input
+extern volatile int isMouse;
+extern volatile int packet1;
+extern volatile int packetX;
+extern volatile int packetY;
 
 /* function prototypes */
 void VGA_subStrn(int, int, char *, unsigned int, unsigned int, unsigned int);
 void VGA_text (int, int, char *);
 void VGA_box (int, int, int, short);
-void VGA_mouse (int, int, int, short);
+void VGA_mouse (int, short);
 void fill_screen (int, int, int, int, short);
 void HEX_PS2(char, char);
 
