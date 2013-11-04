@@ -84,9 +84,10 @@ void PS2_ISR( void )
 			*(PS2_ptr) = 0xF4;
             isMouse = 1;
             printf("Mouse inserted\n");
+            return;
         }
 
-        if(isMouse) {
+        if(isMouse && (byte2 != (char)0xFA)) {
             packet1 = PS2_data & 0xFF0000;
             packetX = PS2_data & 0xFF00;
             packetY = PS2_data & 0xFF;
