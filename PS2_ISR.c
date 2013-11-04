@@ -3,6 +3,10 @@ extern volatile char byte1, byte2, byte3;
 extern volatile char *kbBuf;
 extern volatile unsigned int kbBufBegin, kbBufEnd;
 extern volatile int change;
+extern volatile int isMouse;
+extern volatile int packet1;
+extern volatile int packetX;
+extern volatile int packetY;
 
 /**
  * lookUpKBCode - lookup table for keyboard key codes, based
@@ -75,12 +79,22 @@ void PS2_ISR( void )
 		/* always save the last two bytes received */
 		byte1 = byte2;
 		byte2 = PS2_data & 0xFF;
-		if ( (byte1 == (char) 0xAA) && (byte2 == (char) 0x00) )
+		if ( (byte1 == (char) 0xAA) && (byte2 == (char) 0x00) ) {
 			// mouse inserted; initialize sending of data
 			*(PS2_ptr) = 0xF4;
+            isMouse = 1;
+            printf("Mouse inserted\n");
+            return;
+        }
 
+        if(isMouse && (byte2 != (char)0xFA)) {
+            packet1 = PS2_data & 0xFF0000;
+            packetX = PS2_data & 0xFF00;
+            packetY = PS2_data & 0xFF;
+            return;
+        }
         // byte 2 == 0x00 means make key,
-		printf("byte 1 = %x, byte 2 = %x\n",byte1,byte2);
+		//printf("byte 1 = %x, byte 2 = %x\n",byte1,byte2);
 		if(byte2 == (char)0XF0) {
 			byte3 = byte1;
 		}
