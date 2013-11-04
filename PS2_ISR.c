@@ -88,8 +88,8 @@ void PS2_ISR( void )
         }
 
         if(isMouse && (byte2 != (char)0xFA)) {
-            packet1 = PS2_data & 0xFF0000;
-            packetX = PS2_data & 0xFF00;
+            packet1 = (PS2_data & 0xFF0000) >> 16;
+            packetX = (PS2_data & 0xFF00) >> 8;
             packetY = PS2_data & 0xFF;
             return;
         }
