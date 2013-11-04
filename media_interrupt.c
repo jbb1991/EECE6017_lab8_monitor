@@ -201,14 +201,14 @@ char getHexCharacter(const char h) {
 }
 
 
-void VGA_printKBScanCode(int x, int y, const char c) {
+void VGA_printKBScanCode(int x, int y) {
     int offset;
   	volatile char * character_buffer = (char *) 0x09000000;	// VGA character buffer
 	/* assume that the text string fits on one line */
 	offset = (y << 7) + x;
-    *(character_buffer + offset) = getHexCharacter(c & 0x0F);
+	*(character_buffer + offset) = getHexCharacter((byte2 >> 4) & 0x0F);
     offset++;
-    *(character_buffer + offset) = getHexCharacter((c >> 4) & 0x0F);
+    *(character_buffer + offset) = getHexCharacter(byte2 & 0x0F);
 }
 
 /****************************************************************************************
@@ -234,7 +234,7 @@ void VGA_subStrn(int x, int y, char *buffer, unsigned int first, unsigned int la
 		++offset;
         idx = (idx+1)%len;
 	}
-    VGA_printKBScanCode(0, 10, buffer[last]);
+    VGA_printKBScanCode(0, 10);
 }
 
 /****************************************************************************************
