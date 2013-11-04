@@ -6,7 +6,7 @@ extern volatile int change;
 
 /**
  * lookUpKBCode - lookup table for keyboard key codes, based
- * on table from www.computer-engineering.com/ps2keyboard/scancodes2.html.
+ * on table from www.computer-engineering.org/ps2keyboard/scancodes2.html.
  * Currently only supports alpha-numerics
  */
 char lookUpKBCode(const char scanCode)
