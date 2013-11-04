@@ -75,10 +75,19 @@ void PS2_ISR( void )
 		/* always save the last two bytes received */
 		byte1 = byte2;
 		byte2 = PS2_data & 0xFF;
-		if ( (byte1 == (char) 0xAA) && (byte2 == (char) 0x00) )
+		if ( (byte1 == (char) 0xAA) && (byte2 == (char) 0x00) ) {
 			// mouse inserted; initialize sending of data
 			*(PS2_ptr) = 0xF4;
+            isMouse = 1;
+            print("Mouse inserted\n");
+        }
 
+        if(isMouse) {
+            packet1 = PS2_data & 0xFF0000;
+            packetX = PS2_data & 0xFF00;
+            packetY = PS2_data & 0xFF;
+            return;
+        }
         // byte 2 == 0x00 means make key,
 		printf("byte 1 = %x, byte 2 = %x\n",byte1,byte2);
 		if(byte2 == (char)0XF0) {

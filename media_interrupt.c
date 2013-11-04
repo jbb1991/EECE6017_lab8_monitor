@@ -14,6 +14,7 @@ extern volatile int change;//used to check change of input
 void VGA_subStrn(int, int, char *, unsigned int, unsigned int, unsigned int);
 void VGA_text (int, int, char *);
 void VGA_box (int, int, int, short);
+void VGA_mouse (int, int, int, short);
 void fill_screen (int, int, int, int, short);
 void HEX_PS2(char, char);
 
@@ -97,7 +98,7 @@ int main(void)
 	color = 0x1863;		// a dark grey color
 	fill_screen (0, 0, screen_x, screen_y, color);	// fill the screen with grey
 	// draw a medium-blue box around the above text, based on the character buffer coordinates
-	blue_x = 28; blue_y = 26; 
+	blue_x = 28; blue_y = 26;
 	// character coords * 4 since characters are 4 x 4 pixel buffer coords (8 x 8 VGA coords)
 	color = 0x187F;		// a medium blue color
 	//VGA_box (blue_x * 4, blue_y * 4, 8, color);
@@ -151,10 +152,13 @@ int main(void)
 		VGA_box (blue_x, blue_y, box_len,color);
 
 		/* display PS/2 data (from interrupt service routine) on HEX displays */
-		if(change == 1)
+		if(change == 1 && !isMouse)
 		{
 			change = 0;
 			VGA_subStrn(0, 0, kbBuf, kbBufBegin, kbBufEnd, KB_BUF_SIZE);
+		}
+		else if(isMouse) {
+			VGA_mouse(blue_x, blue_y, box_len,color);
 		}
 		timeout = 0;
 	}
@@ -246,6 +250,28 @@ void VGA_box(int x, int y, int len, short pixel_color)
   	volatile short * pixel_buffer = (short *) 0x08000000;	// VGA pixel buffer
 
 	/* assume that the box coordinates are valid */
+	for (row = y; row <= y+len; row++)
+	{
+		col = x;
+		while (col <= x+len)
+		{
+			offset = (row << 9) + col;
+			*(pixel_buffer + offset) = pixel_color;	// compute halfword address, set pixel
+			++col;
+		}
+	}
+}
+
+void VGA_mouse (int len, short pixel_color) {
+	int offset, row, col;
+	int y = 15;
+	int x = 15;
+  	volatile short * pixel_buffer = (short *) 0x08000000;	// VGA pixel buffer
+
+  	//logic to determine how much to move the box
+
+	/* assume that the box coordinates are valid */
+	printf("byte1: %x, byteX: %x, byteY: %x\n");
 	for (row = y; row <= y+len; row++)
 	{
 		col = x;
