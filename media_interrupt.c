@@ -1,6 +1,13 @@
 #include "nios2_ctrl_reg_macros.h"
 #include "globals.h"
 
+#define RIGHT 1
+#define LEFT 2
+#define UP 4
+#define DOWN 8
+#define SCREEN_WIDTH 319
+#define SCREEN_HEIGHT 239
+
 /* these globals are written by interrupt service routines; we have to declare 
  * these as volatile to avoid the compiler caching their values in registers */
 extern volatile char byte1, byte2, byte3;			/* modified by PS/2 interrupt service routine */
@@ -17,8 +24,8 @@ extern volatile int packetY;
 
 int mouseX,
 	mouseY,
-	lastMouseX = 0,
-	lastMouseY = 0;
+	lastMouseX = SCREEN_WIDTH/2,
+	lastMouseY = SCREEN_HEIGHT/2;
 	
 const int box_len = 8;
 
@@ -49,12 +56,7 @@ void HEX_PS2(char, char);
  * 	5. The speed of refreshing the VGA screen
  * 	   are controlled by interrupts from the interval timer
 ********************************************************************************/
-#define RIGHT 1
-#define LEFT 2
-#define UP 4
-#define DOWN 8
-#define SCREEN_WIDTH 319
-#define SCREEN_HEIGHT 239
+
 
 int main(void)
 {
@@ -172,7 +174,7 @@ int main(void)
 			VGA_subStrn(0, 0, kbBuf, kbBufBegin, kbBufEnd, KB_BUF_SIZE);
 		}
 		else if(isMouse && mouseDataReady) {
-			printf("PacketX: %d, PacketY: %d\n",packetX,packetY);
+			//printf("PacketX: %d, PacketY: %d\n",packetX,packetY);
 			int signbitx = (1<<4 & packet1)>>4;
 			int signbity = (1<<5 & packet1)>>5;
 			if(signbitx == 1) 
