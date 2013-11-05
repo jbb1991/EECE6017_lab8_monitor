@@ -7,6 +7,7 @@ extern volatile int isMouse;
 extern volatile int packet1;
 extern volatile int packetX;
 extern volatile int packetY;
+extern volatile int mouseDataReady;
 
 /**
  * lookUpKBCode - lookup table for keyboard key codes, based
@@ -99,7 +100,7 @@ void PS2_ISR( void )
 			}
 			else if(byteCount == 2) {
 				packetY = PS2_data & 0xFF;
-				mouseDataRedy = 1;
+				mouseDataReady = 1;
 			}
             byteCount = (byteCount + 1)%3;
 			return;
