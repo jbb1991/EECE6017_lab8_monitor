@@ -166,7 +166,6 @@ int main(void)
         }
 
 		VGA_box (blue_x, blue_y, box_len,color);
-
 		/* display PS/2 data (from interrupt service routine) on HEX displays */
 		if(change == 1 && !isMouse)
 		{
@@ -174,17 +173,17 @@ int main(void)
 			VGA_subStrn(0, 0, kbBuf, kbBufBegin, kbBufEnd, KB_BUF_SIZE);
 		}
 		else if(isMouse && mouseDataReady) {
-			//printf("PacketX: %d, PacketY: %d\n",packetX,packetY);
+			printf("PacketX: %u, PacketY: %u\n",packetX,packetY);
 			int signbitx = (1<<4 & packet1)>>4;
 			int signbity = (1<<5 & packet1)>>5;
 			if(signbitx == 1) 
-				mouseX = (lastMouseX - packetX%10);
+				mouseX = (lastMouseX - (((~packetX)+1)%10));
             else 
-				mouseX = (lastMouseX + packetX%10);
+				mouseX = (lastMouseX + packetX);
             if(signbity == 1) 
-				mouseY = (lastMouseY + packetY%10);
+				mouseY = (lastMouseY + (((~packetY)+1)%10));
 			else
-				mouseY = (lastMouseY - packetY%10);
+				mouseY = (lastMouseY - packetY);
 			VGA_mouse(mouseX, mouseY);
             lastMouseX = mouseX;
             lastMouseY = mouseY;
@@ -295,8 +294,24 @@ void VGA_box(int x, int y, int len, short pixel_color)
 void VGA_mouse (int x, int y) {
 	VGA_box(lastMouseX, lastMouseY, box_len, 0x0000);
 	int offset, row, col;
-	y = y%SCREEN_HEIGHT;
-	x = x%SCREEN_WIDTH;
+	if(y < 0) {
+		y=0;
+		lastMouseY =0;
+	}
+	if(x < 0) {
+		x=0;
+		lastMouseX =0;
+	}
+	if(x > SCREEN_WIDTH-8) {
+		x = SCREEN_WIDTH-8;
+		lastMouseX = SCREEN_WIDTH-8;
+	}
+	if(y > SCREEN_HEIGHT-8) {
+		y = SCREEN_HEIGHT -8;
+		lastMouseY = SCREEN_HEIGHT -8;
+	}
+	//y = y%SCREEN_HEIGHT;
+	//x = x%SCREEN_WIDTH;
   	volatile short * pixel_buffer = (short *) 0x08000000;	// VGA pixel buffer
 	const int len = 7;
 	short pixelColor;
