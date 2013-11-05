@@ -85,7 +85,7 @@ void PS2_ISR( void )
 			// mouse inserted; initialize sending of data
 			*(PS2_ptr) = 0xF4;
             isMouse = 1;
-            printf("Mouse inserted\n");
+            //printf("Mouse inserted\n");
             return;
         }
 
