@@ -175,17 +175,25 @@ int main(void)
 		}
 		else if(isMouse && mouseDataReady) {
 			//printf("PacketX: %d, PacketY: %d\n",packetX,packetY);
+
+            // Check for sign and account for it
 			int signbitx = (1<<4 & packet1)>>4;
 			int signbity = (1<<5 & packet1)>>5;
-			if(signbitx == 1) 
-				mouseX = (lastMouseX - packetX%10);
-            else 
-				mouseX = (lastMouseX + packetX%10);
-            if(signbity == 1) 
-				mouseY = (lastMouseY + packetY%10);
-			else
-				mouseY = (lastMouseY - packetY%10);
+            packetX = signbitx ? packetX-256 : packetX;
+            packetY = signbity ? packetY-256 : packetY;
+
+            // Normalize the mouse input and scale into screen size. Divide by 10 to adjust sensitivity
+            float changeX = (((float)packetX+255)/(512.0f*10.0f))*SCREEN_WIDTH;
+            float changeY = (((float)packetY+255)/(512.0f*10.0f))*SCREEN_HEIGHT;
+
+            // Update mouse location
+            mouseX = lastMouseX + (int)changeX;
+            mouseY = lastMouseY + (int)changeY;
+
+            // Draw mouse on screen
 			VGA_mouse(mouseX, mouseY);
+
+            // Store last mouse location
             lastMouseX = mouseX;
             lastMouseY = mouseY;
 			mouseDataReady = 0;
