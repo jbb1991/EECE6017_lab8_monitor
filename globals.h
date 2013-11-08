@@ -14,6 +14,6 @@ struct mouse_dev {
     int deltaX;
     int deltaY;
     int buttons;
-}
+};
 
 #endif //GLOBALS_H

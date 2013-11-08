@@ -3,6 +3,7 @@
 extern volatile char    packet1, packetX, packetY;
 extern volatile int     mouseDataReady;
 extern volatile int     mouseDataProcessing;
+extern volatile struct  mouse_dev   mouse;
 
 
 /***************************************************************************************

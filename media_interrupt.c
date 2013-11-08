@@ -232,14 +232,11 @@ void VGA_mouse (int x, int y) {
         rightDown = 0xFFFF,
         bothDown = 0xFFFF;
   //logic to determine how much to move the box
-  if(packet1&1 == 1) {
+  if(mouse.buttons & LMB) {
     pixelColor = leftDown;
   }
-  else if(packet1&2 == 2) {
+  else if(mouse.buttons & RMB) {
     pixelColor = rightDown;
-  }
-  else if(packet1&3 == 3) {
-    pixelColor = bothDown;
   }
   else {
     pixelColor = allUp;
@@ -269,3 +266,45 @@ void fill_screen(int x1, int y1, int x2, int y2, short pixel_color)
   }
 }
 
+int init_ps2(void)
+{
+    volatile int * PS2_ptr = (int *) 0x10000100;		// PS/2 port address
+    char PS2_data;
+    *(PS2_ptr) = 0xFF; 				/* reset */
+    PS2_data = (*PS2_ptr)&(char)0xFF;
+
+    // Wait for an ACK
+    while(PS2_data != (char)0xFA) {
+        PS2_data = (*PS2_ptr)&(char)0xFF;
+    }
+
+    // Wait for a response from the BAT. 0xAA means OK, 0xFC means error
+    while(PS2_data != (char)0xAA || PS2_data != (char)0xFC) {
+        PS2_data = (*PS2_ptr)&(char)0xFF;
+    }
+    if(PS2_data == (char)0xFC)
+        return -1;
+
+    // Wait until the mouse ID is received
+    while(*(PS2_ptr) == PS2_data) {
+
+    }
+    PS2_data = (*PS2_ptr)&(char)0xFF;
+
+    // ID == 0x03, scrollwheel mouse with 4 byte packet.
+    // we do not support this
+    if(PS2_data == (char)0x03) {
+        return -1;
+    }
+
+    // Enable reporting of new data
+    (*PS2_ptr) = 0xF4;
+
+    // Wait for an ACK
+    while(PS2_data != (char)0xFA) {
+        PS2_data = (*PS2_ptr)&(char)0xFF;
+    }
+
+    // Write to the PS/2 Control register to enable interrupts
+    *(PS2_ptr + 1) = 0x1;
+}
