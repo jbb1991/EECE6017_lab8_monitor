@@ -2,6 +2,7 @@
 
 extern volatile char    packet1, packetX, packetY;
 extern volatile int     mouseDataReady;
+extern volatile int     mouseDataProcessing;
 
 
 /***************************************************************************************
@@ -37,7 +38,22 @@ void PS2_ISR( void )
         {
             byteCount = 0;
             packetY = PS2_data & 0xFF;
-            mouseDataReady = 1;
+            if(mouseDataProcessing == 0)
+            {
+                //change struct here
+                if((packet1 & 1<<4 )!= 0)
+                {
+                    packetX = packetX - 256;
+                }
+                if((packet1 & 1<<5) != 0)
+                {
+                    packetY = packetY - 256;
+                }
+                mouse.deltaX = packetX;
+                mouse.deltaY = packetY;
+                mouse.buttons = packet1 & 0x7;
+                mouseDataReady = 1;
+            }
         }
 	}
 	return;
