@@ -39,12 +39,6 @@ void PS2_ISR( void )
             packetY = PS2_data & 0xFF;
             mouseDataReady = 1;
         }
-        //Should never be reached
-        else
-        {
-            mouseDataReady = 0;
-            byteCount = 0;
-        }
 	}
 	return;
 }
