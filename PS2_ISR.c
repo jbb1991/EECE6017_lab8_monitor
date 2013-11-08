@@ -73,6 +73,7 @@ void PS2_ISR( void )
   	volatile int * PS2_ptr = (int *) 0x10000100;		// PS/2 port address
 	int PS2_data, RVALID;
     char lookUpResult;
+	static int ackReceived = 0;
 
 	PS2_data = *(PS2_ptr);					// read the Data register in the PS/2 port
 	RVALID = (PS2_data & 0x8000);			// extract the RVALID field
@@ -88,8 +89,10 @@ void PS2_ISR( void )
             //printf("Mouse inserted\n");
             return;
         }
+		if(!ackReceived && byte2 == (char)0xFA)
+			ackReceived = 1;
 
-        if(isMouse && (byte2 != (char)0xFA)) {
+        if(isMouse && ackReceived) {
 			if(byteCount == 0) {
 				packet1 = PS2_data & 0xFF;
 				mouseDataReady = 0;
