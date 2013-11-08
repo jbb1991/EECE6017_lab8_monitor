@@ -183,8 +183,8 @@ int main(void)
             packetY = signbity ? packetY-256 : packetY;
 
             // Normalize the mouse input and scale into screen size. Divide by 10 to adjust sensitivity
-            float changeX = (((float)packetX+255)/(512.0f*10.0f))*SCREEN_WIDTH;
-            float changeY = (((float)packetY+255)/(512.0f*10.0f))*SCREEN_HEIGHT;
+            float changeX = (((float)packetX)/(256.0f*1000.0f))*SCREEN_WIDTH;
+            float changeY = (((float)packetY)/(256.0f*1000.0f))*SCREEN_HEIGHT;
 
             // Update mouse location
             mouseX = lastMouseX + (int)changeX;
