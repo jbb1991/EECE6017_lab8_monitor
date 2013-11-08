@@ -28,17 +28,20 @@ void PS2_ISR( void )
             mouseDataReady = 0;
             byteCount++;
             packet1 = PS2_data & 0xFF;
+          //  //printf("getting pack1\n");
         }
         else if(byteCount == 1)
         {
             mouseDataReady = 0;
             byteCount++;
             packetX = PS2_data & 0xFF;
+         //   //printf("getting packx\n");
         }
         else if(byteCount == 2)
         {
             byteCount = 0;
             packetY = PS2_data & 0xFF;
+            //printf("getting packy\n");
             if(mouseDataProcessing == 0)
             {
                 //change struct here
@@ -54,8 +57,18 @@ void PS2_ISR( void )
                 mouse.deltaY = packetY;
                 mouse.buttons = packet1 & 0x7;
                 mouseDataReady = 1;
+                //printf("updated mouse\n");
+            }
+            else
+            {
+                //printf("could not update mouse\n");
             }
         }
+        //printf("bytecode is: %d\n ps2 data: %d\n", byteCount, PS2_data);
 	}
+    else
+    {
+        //printf("not valid R\n");
+    }
 	return;
 }

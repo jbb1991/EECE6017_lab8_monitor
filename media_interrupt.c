@@ -86,7 +86,7 @@ int main(void)
 
   *(KEY_ptr + 2) = 0xE; 			/* write to the pushbutton interrupt mask register, and
   * set 3 mask bits to 1 (bit 0 is Nios II reset) */
-  if(!init_ps2()) {
+  if(init_ps2() < 0) {
     printf("PS/2 did not init properly!\n");
   }
 
@@ -161,8 +161,8 @@ int main(void)
     mouseDataProcessing = 1;
 
     // Normalize the mouse input and scale into screen size. Divide by 10 to adjust sensitivity
-    float changeX = (((float)mouse.deltaX)/(256.0f*10.0f))*SCREEN_WIDTH;
-    float changeY = (((float)mouse.deltaY)/(256.0f*10.0f))*SCREEN_HEIGHT;
+    float changeX = (((float)mouse.deltaX)/(256.0f))*SCREEN_WIDTH;
+    float changeY = (-1)*((((float)mouse.deltaY)/(256.0f))*SCREEN_HEIGHT);
 
     // Update mouse location
     mouseX = lastMouseX + (int)changeX;
@@ -271,40 +271,49 @@ int init_ps2(void)
     volatile int * PS2_ptr = (int *) 0x10000100;		// PS/2 port address
     char PS2_data;
     *(PS2_ptr) = 0xFF; 				/* reset */
+    *(PS2_ptr + 1) = 0x1;
     PS2_data = (*PS2_ptr)&(char)0xFF;
 
     // Wait for an ACK
     while(PS2_data != (char)0xFA) {
         PS2_data = (*PS2_ptr)&(char)0xFF;
+       // printf("waiting for ack");
     }
 
     // Wait for a response from the BAT. 0xAA means OK, 0xFC means error
-    while(PS2_data != (char)0xAA || PS2_data != (char)0xFC) {
+    while(PS2_data != (char)0xAA && PS2_data != (char)0xFC) {
         PS2_data = (*PS2_ptr)&(char)0xFF;
+       // printf("waiting for response from BAT and ps2 data is: %i\n", PS2_data);
     }
     if(PS2_data == (char)0xFC)
+    {
+        printf("data bad");
         return -1;
-
+    }
     // Wait until the mouse ID is received
     while(*(PS2_ptr) == PS2_data) {
-
+      //  printf("waiting for the mouseID receive");
     }
     PS2_data = (*PS2_ptr)&(char)0xFF;
 
     // ID == 0x03, scrollwheel mouse with 4 byte packet.
     // we do not support this
     if(PS2_data == (char)0x03) {
+       // printf("scroll stuffs bad");
         return -1;
     }
+
 
     // Enable reporting of new data
     (*PS2_ptr) = 0xF4;
 
     // Wait for an ACK
     while(PS2_data != (char)0xFA) {
+       // printf("waiting for ack again");
         PS2_data = (*PS2_ptr)&(char)0xFF;
     }
 
     // Write to the PS/2 Control register to enable interrupts
-    *(PS2_ptr + 1) = 0x1;
+
+    return 0;
 }
