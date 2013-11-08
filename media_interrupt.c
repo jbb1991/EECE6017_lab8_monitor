@@ -21,6 +21,7 @@ extern volatile int mouseDataReady;
 extern volatile int packet1;
 extern volatile int packetX;
 extern volatile int packetY;
+extern volatile int mouseDateProcessing;
 
 int mouseX,
     mouseY,
@@ -162,6 +163,7 @@ int main(void)
 
     /* display PS/2 data (from interrupt service routine) on HEX displays */
     // Check for sign and account for it
+    mouseDataProcessing = 1;
     int signbitx = (1<<4 & packet1)>>4;
     int signbity = (1<<5 & packet1)>>5;
     packetX = signbitx ? packetX-256 : packetX;
@@ -176,7 +178,10 @@ int main(void)
     mouseY = lastMouseY + (int)changeY;
 
     // Draw mouse on screen
-    VGA_mouse(mouseX, mouseY);
+    if(mouseDataReady)
+      VGA_mouse(mouseX, mouseY);
+    
+    mouseDataProcessing = 0;
 
     // Store last mouse location
     lastMouseX = mouseX;
