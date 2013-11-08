@@ -93,9 +93,9 @@ int main(void)
 	
 	*(KEY_ptr + 2) = 0xE; 			/* write to the pushbutton interrupt mask register, and
 											 * set 3 mask bits to 1 (bit 0 is Nios II reset) */
-
-	*(PS2_ptr) = 0xFF; 				/* reset */
-	*(PS2_ptr + 1) = 0x1; 			/* write to the PS/2 Control register to enable interrupts */
+    if(!init_ps2()) {
+        printf("PS/2 did not init properly!\n");
+    }
 
 	NIOS2_WRITE_IENABLE( 0xC3 );	/* set interrupt mask bits for levels 0 (interval
 											 * timer), 1 (pushbuttons), 6 (audio), and 7 (PS/2) */
