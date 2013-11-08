@@ -13,15 +13,9 @@
 extern volatile char byte1, byte2, byte3;			/* modified by PS/2 interrupt service routine */
 extern volatile int record, play, buffer_index;	// used for audio
 extern volatile int timeout;							// used to synchronize with the timer
-extern volatile char *kbBuf;  // Use to store the keyboard input
-extern volatile unsigned int kbBufBegin, kbBufEnd; // Used to keep track of the keyboard input
-extern volatile int change;//used to check change of input
-extern volatile int isMouse;
 extern volatile int mouseDataReady;
-extern volatile int packet1;
-extern volatile int packetX;
-extern volatile int packetY;
-extern volatile int mouseDateProcessing;
+extern volatile int mouseDataProcessing;
+extern volatile struct mouse_dev mouse;
 
 int mouseX,
     mouseY,
@@ -34,6 +28,7 @@ const int box_len = 8;
 void VGA_box (int, int, int, short);
 void VGA_mouse (int, int);
 void fill_screen (int, int, int, int, short);
+int init_ps2(void);
 
 /********************************************************************************
  * This program demonstrates use of the media ports in the DE1 Media Computer
@@ -164,14 +159,10 @@ int main(void)
     /* display PS/2 data (from interrupt service routine) on HEX displays */
     // Check for sign and account for it
     mouseDataProcessing = 1;
-    int signbitx = (1<<4 & packet1)>>4;
-    int signbity = (1<<5 & packet1)>>5;
-    packetX = signbitx ? packetX-256 : packetX;
-    packetY = signbity ? packetY-256 : packetY;
 
     // Normalize the mouse input and scale into screen size. Divide by 10 to adjust sensitivity
-    float changeX = (((float)packetX)/(256.0f*10.0f))*SCREEN_WIDTH;
-    float changeY = (((float)packetY)/(256.0f*10.0f))*SCREEN_HEIGHT;
+    float changeX = (((float)mouse.deltaX)/(256.0f*10.0f))*SCREEN_WIDTH;
+    float changeY = (((float)mouse.deltaY)/(256.0f*10.0f))*SCREEN_HEIGHT;
 
     // Update mouse location
     mouseX = lastMouseX + (int)changeX;
