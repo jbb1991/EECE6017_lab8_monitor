@@ -1,54 +1,7 @@
 #include "globals.h"
 
-/**
- * lookUpKBCode - lookup table for keyboard key codes, based
- * on table from www.computer-engineering.com/ps2keyboard/scancodes2.html.
- * Currently only supports alpha-numerics
- */
-char lookUpKBCode(const char scanCode)
-{
-    switch(scanCode) {
-        case 0x1C: return 'a';
-        case 0x32: return 'b';
-        case 0x21: return 'c';
-        case 0x23: return 'd';
-        case 0x24: return 'e';
-        case 0x2B: return 'f';
-        case 0x34: return 'g';
-        case 0x33: return 'h';
-        case 0x43: return 'i';
-        case 0x3B: return 'j';
-        case 0x42: return 'k';
-        case 0x4B: return 'l';
-        case 0x3A: return 'm';
-        case 0x31: return 'n';
-        case 0x44: return 'o';
-        case 0x4D: return 'p';
-        case 0x15: return 'q';
-        case 0x2D: return 'r';
-        case 0x1B: return 's';
-        case 0x2C: return 't';
-        case 0x3C: return 'u';
-        case 0x2A: return 'v';
-        case 0x1D: return 'w';
-        case 0x22: return 'x';
-        case 0x35: return 'y';
-        case 0x1A: return 'z';
-        case 0x45: return '0';
-        case 0x16: return '1';
-        case 0x1E: return '2';
-        case 0x26: return '3';
-        case 0x25: return '4';
-        case 0x2E: return '5';
-        case 0x36: return '6';
-        case 0x3D: return '7';
-        case 0x3E: return '8';
-        case 0x46: return '9';
-		case 0x5A: return '\n';
-		case 0x29: return ' ';
-        default: return '&';
-    }
-}
+extern volatile char    packet1, packetX, packetY;
+extern volatile int     mouseDataReady;
 
 
 /***************************************************************************************
@@ -68,7 +21,30 @@ void PS2_ISR( void )
 	RVALID = (PS2_data & 0x8000);			// extract the RVALID field
 	if (RVALID)
 	{
-        
+        if(byteCount == 0)
+        {
+            mouseDataReady = 0;
+            byteCount++;
+            packet1 = PS2_data & 0xFF;
+        }
+        else if(byteCount == 1)
+        {
+            mouseDataReady = 0;
+            byteCount++;
+            packetX = PS2_data & 0xFF;
+        }
+        else if(byteCount == 2)
+        {
+            byteCount = 0;
+            packetY = PS2_data & 0xFF;
+            mouseDataReady = 1;
+        }
+        //Should never be reached
+        else
+        {
+            mouseDataReady = 0;
+            byteCount = 0;
+        }
 	}
 	return;
 }
