@@ -105,6 +105,9 @@ void PS2_ISR( void )
             byteCount = (byteCount + 1)%3;
 			return;
         }
+        else if(isMouse) {
+            printf("Received ACK from mouse\n");
+        }
         // byte 2 == 0x00 means make key,
 		//printf("byte 1 = %x, byte 2 = %x\n",byte1,byte2);
 		if(byte2 == (char)0XF0) {
