@@ -119,6 +119,8 @@ int main(void)
     while (!timeout)
       ;	// wait to synchronize with timer 
 
+    fill_screen (0, 0, screen_x, screen_y, color);	// fill the screen with grey
+
     VGA_box(blue_x, blue_y, box_len, background_color);
     blue_x += ALT_inc_x;
     blue_y += ALT_inc_y;
@@ -160,7 +162,7 @@ int main(void)
     // Check for sign and account for it
     mouseDataProcessing = 1;
 
-    // Normalize the mouse input and scale into screen size. Divide by 10 to adjust sensitivity
+    // Normalize the mouse input and scale into screen size
     float changeX = (((float)mouse.deltaX)/(256.0f))*SCREEN_WIDTH;
     float changeY = (-1)*((((float)mouse.deltaY)/(256.0f))*SCREEN_HEIGHT);
 
@@ -270,10 +272,13 @@ int init_ps2(void)
 {
     volatile int * PS2_ptr = (int *) 0x10000100;		// PS/2 port address
     char PS2_data;
-    *(PS2_ptr) = 0xFF; 				/* reset */
-    *(PS2_ptr + 1) = 0x1;
-    PS2_data = (*PS2_ptr)&(char)0xFF;
+    // Reset the mouse
+    *(PS2_ptr) = 0xFF;
 
+    // Write to the PS/2 Control register to enable interrupts
+    *(PS2_ptr + 1) = 0x1;
+
+    PS2_data = (*PS2_ptr)&(char)0xFF;
     // Wait for an ACK
     while(PS2_data != (char)0xFA) {
         PS2_data = (*PS2_ptr)&(char)0xFF;
@@ -283,7 +288,7 @@ int init_ps2(void)
     // Wait for a response from the BAT. 0xAA means OK, 0xFC means error
     while(PS2_data != (char)0xAA && PS2_data != (char)0xFC) {
         PS2_data = (*PS2_ptr)&(char)0xFF;
-       // printf("waiting for response from BAT and ps2 data is: %i\n", PS2_data);
+       // printf("waiting for response from BAT and ps2 data is: %x\n", PS2_data);
     }
     if(PS2_data == (char)0xFC)
     {
@@ -313,7 +318,6 @@ int init_ps2(void)
         PS2_data = (*PS2_ptr)&(char)0xFF;
     }
 
-    // Write to the PS/2 Control register to enable interrupts
 
     return 0;
 }
