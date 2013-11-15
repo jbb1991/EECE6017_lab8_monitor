@@ -119,7 +119,7 @@ int main(void)
     while (!timeout)
       ;	// wait to synchronize with timer 
 
-    VGA_box (blue_x, blue_y, box_len,color);
+    VGA_box (blue_x, blue_y, box_len,0x1863);
     blue_x += ALT_inc_x;
     blue_y += ALT_inc_y;
 
@@ -229,7 +229,7 @@ void VGA_mouse (int x, int y) {
   const int len = 7;
   short pixelColor;
   const short allUp = 0xFFFF,
-        leftDown = 0xFFFF,
+        leftDown = 0x1863,
         rightDown = 0xFFFF,
         bothDown = 0xFFFF;
   //logic to determine how much to move the box
