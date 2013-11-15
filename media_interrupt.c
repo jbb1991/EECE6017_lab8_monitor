@@ -229,7 +229,7 @@ void VGA_mouse (int x, int y) {
   const int len = 7;
   short pixelColor;
   const short allUp = 0xFFFF,
-        leftDown = 0x1863,
+        leftDown = 0xF00F,
         rightDown = 0xFFFF,
         bothDown = 0xFFFF;
   //logic to determine how much to move the box
