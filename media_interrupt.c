@@ -119,9 +119,8 @@ int main(void)
     while (!timeout)
       ;	// wait to synchronize with timer 
 
-    fill_screen (0, 0, screen_x, screen_y, color);	// fill the screen with grey
+    fill_screen (0, 0, screen_x, screen_y, 0x1863);	// fill the screen with grey
 
-    VGA_box(blue_x, blue_y, box_len, background_color);
     blue_x += ALT_inc_x;
     blue_y += ALT_inc_y;
 
@@ -206,7 +205,6 @@ void VGA_box(int x, int y, int len, short pixel_color)
 }
 
 void VGA_mouse (int x, int y) {
-  VGA_box(lastMouseX, lastMouseY, box_len, 0x0000);
   int offset, row, col;
   if(y < 0) {
     y=0;
