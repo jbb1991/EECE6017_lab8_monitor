@@ -119,8 +119,7 @@ int main(void)
     while (!timeout)
       ;	// wait to synchronize with timer 
 
-    fill_screen (0, 0, screen_x, screen_y, 0x1863);	// fill the screen with grey
-
+    VGA_box (blue_x, blue_y, box_len,color);
     blue_x += ALT_inc_x;
     blue_y += ALT_inc_y;
 
@@ -155,7 +154,6 @@ int main(void)
       }
     }
 
-    VGA_box (blue_x, blue_y, box_len,color);
 
     /* display PS/2 data (from interrupt service routine) on HEX displays */
     // Check for sign and account for it
@@ -170,9 +168,12 @@ int main(void)
     mouseY = lastMouseY + (int)changeY;
 
     // Draw mouse on screen
-    if(mouseDataReady)
-      VGA_mouse(mouseX, mouseY);
+    if(mouseDataReady) {
+        fill_screen (0, 0, screen_x, screen_y, 0x1863);	// fill the screen with grey
+        VGA_mouse(mouseX, mouseY);
+    }
     
+    VGA_box (blue_x, blue_y, box_len,color);
     mouseDataProcessing = 0;
 
     // Store last mouse location
